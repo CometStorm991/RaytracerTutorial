@@ -3,6 +3,14 @@
 #include <vector>
 
 #include <STB/stb_image_write.h>
+#include <glm/glm.hpp>
+
+void writeColor(std::vector<uint8_t>& imageData, glm::vec3 color)
+{
+	imageData.push_back(static_cast<uint8_t>(color.x * 256.0f));
+	imageData.push_back(static_cast<uint8_t>(color.y * 256.0f));
+	imageData.push_back(static_cast<uint8_t>(color.z * 256.0f));
+}
 
 int main()
 {
@@ -19,9 +27,7 @@ int main()
 			float g = static_cast<float>(j) / (imageWidth - 1);
 			float b = 0.0f;
 
-			imageData.push_back(static_cast<uint8_t>(r * 256.0f));
-			imageData.push_back(static_cast<uint8_t>(g * 256.0f));
-			imageData.push_back(static_cast<uint8_t>(b * 256.0f));
+			writeColor(imageData, glm::vec3(r, g, b));
 		}
 	}
 
