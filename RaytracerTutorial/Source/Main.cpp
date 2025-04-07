@@ -5,6 +5,8 @@
 #include <STB/stb_image_write.h>
 #include <glm/glm.hpp>
 
+#include "Ray.hpp"
+
 void writeColor(std::vector<uint8_t>& imageData, glm::vec3 color)
 {
 	imageData.push_back(static_cast<uint8_t>(color.x * 256.0f));
@@ -16,6 +18,7 @@ int main()
 {
 	const unsigned int imageWidth = 1920;
 	const unsigned int imageHeight = 1080;
+	const float aspectRatio = imageWidth / imageHeight;
 
 	std::vector<uint8_t> imageData;
 
