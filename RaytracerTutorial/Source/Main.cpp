@@ -19,6 +19,11 @@ int main()
 	const unsigned int imageWidth = 1920;
 	const unsigned int imageHeight = 1080;
 	const float aspectRatio = imageWidth / imageHeight;
+	
+	const float viewportHeight = 2.0f;
+	const float viewportWidth = viewportHeight * aspectRatio;
+
+
 
 	std::vector<uint8_t> imageData;
 
