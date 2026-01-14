@@ -38,7 +38,11 @@ glm::vec3 rayColor(const Ray& ray)
 	{
 		return glm::vec3(0.0f, 0.5f, 1.0f);
 	}
-	return glm::vec3(0.0f, 0.0f, 0.0f);
+
+	glm::vec3 unitDirection = glm::normalize(ray.getDir());
+	float a = 0.5f * (unitDirection.y + 1.0f);
+
+	return (1.0f - a) * glm::vec3(0.0f, 0.0f, 0.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
 int main()
