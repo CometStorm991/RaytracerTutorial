@@ -63,6 +63,7 @@ int main()
 	glm::vec3 cameraPos = glm::vec3(0, 0, 0);
 
 	std::vector<uint8_t> imageData;
+	imageData.reserve(imageHeight * imageWidth * 3);
 
 	for (uint32_t i = 0; i < imageHeight; i++)
 	{
