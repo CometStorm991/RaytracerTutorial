@@ -1,10 +1,13 @@
 #include <cmath>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
-#include <STB/stb_image_write.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <STB/stb_image_write.h>
 
 #include "Ray.hpp"
 
@@ -45,11 +48,16 @@ glm::vec3 rayColor(const Ray& ray)
 	return (1.0f - a) * glm::vec3(0.0f, 0.0f, 0.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
+GLFWwindow* createWindow();
+void renderLoop();
+
 int main()
 {
 	const uint32_t imageWidth = 2560;
-	const uint32_t imageHeight = 1600;
+	const uint32_t imageHeight = 1440;
 	const float aspectRatio = static_cast<float>(imageWidth) / imageHeight;
+
+	renderLoop();
 	
 	const float viewportHeight = 2.0f;
 	const float viewportWidth = viewportHeight * aspectRatio;
@@ -85,11 +93,51 @@ int main()
 		uint32_t hundredth = static_cast<uint32_t>(imageHeight / 100.0f);
 		if ((i + 1) % hundredth == 0)
 		{
-			std::cout << "Progress: " << static_cast<float>(i + 1) / imageHeight << std::endl;
+			std::cout << "Progress: " << std::fixed << std::setprecision(3) << static_cast<float>(i + 1) / imageHeight << std::endl;
 		}
 	}
 
 	stbi_write_png("Renders/Render.png", imageWidth, imageHeight, 3, imageData.data(), 3 * imageWidth * sizeof(uint8_t));
 
 	return 0;
+}
+
+GLFWwindow* createWindow() {
+	GLFWwindow* window;
+
+	/* Initialize the library */
+	if (!glfwInit())
+		return nullptr;
+
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return nullptr;
+	}
+
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
+
+	return window;
+}
+
+void renderLoop() {
+	GLFWwindow* windPtr = createWindow();
+
+	/* Loop until the user closes the window */
+	while (!glfwWindowShouldClose(windPtr))
+	{
+		/* Render here */
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		/* Swap front and back buffers */
+		glfwSwapBuffers(windPtr);
+
+		/* Poll for and process events */
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
 }
