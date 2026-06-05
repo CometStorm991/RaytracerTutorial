@@ -28,8 +28,8 @@ int main()
 
 	Camera cam;
 
-	cam.imageWidth = 2560;
-	cam.imageHeight = 1440;
+	cam.imageWidth = 1920;
+	cam.imageHeight = 1080;
 
 	cam.render(world);
 	

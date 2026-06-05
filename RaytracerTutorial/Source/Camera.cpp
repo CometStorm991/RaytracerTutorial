@@ -10,20 +10,18 @@ void Camera::render(const Hittable& world)
 	{
 		for (uint32_t j = 0; j < imageWidth; j++)
 		{
-			float y = rayInitY + rayDeltaY * i;
-			float x = rayInitX + rayDeltaX * j;
-			float z = -1.0f;
+			glm::vec3 pixCol{ 0.0f, 0.0f, 0.0f };
+			for (uint32_t k = 0; k < sampsPerPix; k++)
+			{
+				Ray ray = getRay(i, j);
+				pixCol += rayColor(ray, maxDepth, world);
+			}
+			pixCol *= pixSampsScale;
 
-			glm::vec3 viewportPos = glm::vec3(x, y, z);
-			// std::cout << x << " " << y << " " << z << std::endl;
-			Ray ray = Ray(pos, viewportPos - pos);
-
-			glm::vec3 color = rayColor(ray, world);
-
-			writeColor(imageData, glm::vec3(color.x, color.y, color.z));
+			writeColor(imageData, pixCol);
 		}
 
-		uint32_t hundredth = static_cast<uint32_t>(imageHeight / 100.0f);
+		uint32_t hundredth = static_cast<uint32_t>(std::max(imageHeight / 100.0f, 1.0f));
 		if ((i + 1) % hundredth == 0)
 		{
 			std::cout << "Progress: " << std::fixed << std::setprecision(3) << static_cast<float>(i + 1) / imageHeight << std::endl;
@@ -49,16 +47,32 @@ void Camera::init()
 	rayInitY = viewportHeight / 2.0f + 0.5f * rayDeltaY;
 }
 
-glm::vec3 Camera::rayColor(const Ray& ray, const Hittable& world) const
+Ray Camera::getRay(uint32_t i, uint32_t j) const
 {
+	glm::vec3 offs = sampleSquare();
+	glm::vec3 pixSamp{ rayInitX + (j + offs.x) * rayDeltaX, rayInitY + (i + offs.y) * rayDeltaY, pos.z - 1.0f };
+
+	return Ray{ pos, pixSamp - pos };
+}
+
+glm::vec3 Camera::sampleSquare() const
+{
+	return glm::vec3{ randomFloat() - 0.5f, randomFloat() - 0.5f, 0.0f };
+}
+
+glm::vec3 Camera::rayColor(const Ray& ray, uint32_t depth, const Hittable& world) const
+{
+	if (depth <= 0)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
 	HitRecord hitRec;
-	bool hit = world.hit(ray, Interval{ 0.0f, std::numeric_limits<float>::infinity() }, hitRec);
+	bool hit = world.hit(ray, Interval{ 0.001f, std::numeric_limits<float>::infinity() }, hitRec);
 	if (hit)
 	{
-		glm::vec3 norm = hitRec.norm;
-		norm *= 0.5f;
-		norm += 0.5f;
-		return norm;
+		glm::vec3 dir = hitRec.norm + randomUnitVec3();
+		return 0.5f * rayColor(Ray{ hitRec.point, dir }, depth - 1, world);
 	}
 
 	glm::vec3 unitDir = glm::normalize(ray.getDir());
@@ -67,9 +81,10 @@ glm::vec3 Camera::rayColor(const Ray& ray, const Hittable& world) const
 	return (1.0f - a) * glm::vec3(0.0f, 0.0f, 0.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
-void Camera::writeColor(std::vector<uint8_t>& imageData, glm::vec3 color)
+void Camera::writeColor(std::vector<uint8_t>& imageData, const glm::vec3& color)
 {
-	imageData.push_back(static_cast<uint8_t>(color.x * 255.0f));
-	imageData.push_back(static_cast<uint8_t>(color.y * 255.0f));
-	imageData.push_back(static_cast<uint8_t>(color.z * 255.0f));
+	static const Interval intens{0.0f, 0.999f};
+	imageData.push_back(static_cast<uint8_t>(256.0f * intens.clamp(color.r)));
+	imageData.push_back(static_cast<uint8_t>(256.0f * intens.clamp(color.g)));
+	imageData.push_back(static_cast<uint8_t>(256.0f * intens.clamp(color.b)));
 }
