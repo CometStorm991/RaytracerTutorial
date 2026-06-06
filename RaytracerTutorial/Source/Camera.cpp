@@ -73,6 +73,14 @@ void Camera::accumulate(const Hittable& world)
 						sampG = (sampG * totalSamps + pixCol.g) / (totalSamps + 1.0f);
 						sampB = (sampB * totalSamps + pixCol.b) / (totalSamps + 1.0f);
 					}
+
+					uint32_t hundredth = static_cast<uint32_t>(std::max(imageHeight / 100.0f, 1.0f));
+					if ((i + 1) % hundredth == 0)
+					{
+						float sampProg = static_cast<float>(i + 1) / imageHeight;
+						float prog = (static_cast<float>(k) + sampProg) / sampsPerIt;
+						std::cout << "Progress until next render: " << std::fixed << std::setprecision(6) << prog << std::endl;
+					}
 				}
 
 				totalSamps++;
@@ -100,27 +108,54 @@ void Camera::init()
 
 	imageData.reserve(imageHeight * imageWidth * 3);
 
-	const float viewportHeight = 2.0f;
+	pixSampsScale = 1.0f / sampsPerPix;
+
+	pos = lookFrom;
+
+	float thet = degreesToRadians(vertFov);
+	float h = std::tanf(thet / 2.0f);
+
+	const float viewportHeight = 2.0f * h * focDist;
 	const float viewportWidth = viewportHeight * aspectRatio;
 
-	rayDeltaX = viewportWidth / imageWidth;
-	rayDeltaY = -viewportHeight / imageHeight;
+	w = glm::normalize(lookFrom - lookAt);
+	u = glm::normalize(glm::cross(viewUp, w));
+	v = glm::cross(w, u);
 
-	rayInitX = -viewportWidth / 2.0f + 0.5f * rayDeltaX;
-	rayInitY = viewportHeight / 2.0f + 0.5f * rayDeltaY;
+	glm::vec3 viewU = viewportWidth * u;
+	glm::vec3 viewV = viewportHeight * -v;
+
+	rayDeltU = viewU / static_cast<float>(imageWidth);
+	rayDeltV = viewV / static_cast<float>(imageHeight);
+
+	glm::vec3 viewUpLeft = pos - (focDist * w) - viewU / 2.0f - viewV / 2.0f;
+	pix00Loc = viewUpLeft + 0.5f * rayDeltU + 0.5f * rayDeltV;
+
+	float defocRad = focDist * std::tanf(degreesToRadians(defocAng / 2.0f));
+	defocDiskU = u * defocRad;
+	defocDiskV = v * defocRad;
 }
 
 Ray Camera::getRay(uint32_t i, uint32_t j) const
 {
 	glm::vec3 offs = sampleSquare();
-	glm::vec3 pixSamp{ rayInitX + (j + offs.x) * rayDeltaX, rayInitY + (i + offs.y) * rayDeltaY, pos.z - 1.0f };
+	glm::vec3 pixSamp = pix00Loc + (j + offs.x) * rayDeltU + (i + offs.y) * rayDeltV;
 
-	return Ray{ pos, pixSamp - pos };
+	glm::vec3 rayOrig = defocAng <= 0.0f ? pos : defocusDiskSample();
+	glm::vec3 rayDir = pixSamp - rayOrig;
+
+	return Ray{ rayOrig, rayDir };
 }
 
 glm::vec3 Camera::sampleSquare() const
 {
 	return glm::vec3{ randomFloat() - 0.5f, randomFloat() - 0.5f, 0.0f };
+}
+
+glm::vec3 Camera::defocusDiskSample() const
+{
+	glm::vec3 point = randomVec3InUnitDisk();
+	return pos + (point.x * defocDiskU) + (point.y * defocDiskV);
 }
 
 glm::vec3 Camera::rayColor(const Ray& ray, uint32_t depth, const Hittable& world) const
@@ -146,7 +181,7 @@ glm::vec3 Camera::rayColor(const Ray& ray, uint32_t depth, const Hittable& world
 	glm::vec3 unitDir = glm::normalize(ray.getDir());
 	float a = 0.5f * (unitDir.y + 1.0f);
 
-	return (1.0f - a) * glm::vec3(0.0f, 0.0f, 0.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
+	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
 void Camera::writeColor(std::vector<uint8_t>& imageData, const glm::vec3& color)

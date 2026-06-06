@@ -61,6 +61,16 @@ inline glm::vec3 randomUnitVec3()
 	return point / std::sqrtf(lenSquared);
 }
 
+inline glm::vec3 randomVec3InUnitDisk()
+{
+	glm::vec3 point = glm::vec3{ randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f), 0.0f };
+	while (glm::length2(point) >= 1.0f)
+	{
+		point = glm::vec3{ randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f), 0.0f };
+	}
+	return point;
+}
+
 inline glm::vec3 randomOnHemisphere(const glm::vec3& norm)
 {
 	glm::vec3 point = randomUnitVec3();
