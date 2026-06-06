@@ -7,8 +7,11 @@
 #include <GLFW/glfw3.h>
 
 #include "Camera.hpp"
+#include "Dielectric.hpp"
 #include "Hittable.hpp"
 #include "HittableList.hpp"
+#include "Lambertian.hpp"
+#include "Metal.hpp"
 #include "Sphere.hpp"
 
 glm::vec3 rayColor(const Ray& ray, const Hittable& world);
@@ -20,16 +23,28 @@ int main()
 {
 	HittableList world;
 
-	std::shared_ptr<Sphere> sphere0 = std::make_shared<Sphere>(glm::vec3{ 0.0f, 0.0f, -1.0f }, 0.5f);
-	std::shared_ptr<Sphere> sphere1 = std::make_shared<Sphere>(glm::vec3{ 0.0f, -100.0f, -1.0f }, 99.5f);
+	std::shared_ptr<Material> ground = std::make_shared<Lambertian>(glm::vec3{ 0.8f, 0.8f, 0.0f });
+	std::shared_ptr<Material> cent = std::make_shared<Lambertian>(glm::vec3{ 0.1f, 0.2f, 0.5f });
+	std::shared_ptr<Material> left = std::make_shared<Dielectric>(1.5f);
+	std::shared_ptr<Material> leftIns = std::make_shared<Dielectric>(1.0f / 1.5f);
+	std::shared_ptr<Material> right = std::make_shared<Metal>(glm::vec3{ 0.8f, 0.6f, 0.2f }, 1.0f);
+
+	std::shared_ptr<Sphere> sphere0 = std::make_shared<Sphere>(glm::vec3{ 0.0f, 0.0f, -1.2f }, 0.5f, cent);
+	std::shared_ptr<Sphere> sphere1 = std::make_shared<Sphere>(glm::vec3{ 0.0f, -100.0f, -1.0f }, 99.5f, ground);
+	std::shared_ptr<Sphere> sphere2 = std::make_shared<Sphere>(glm::vec3{ -1.0f, 0.0f, -1.0f }, 0.5f, left);
+	std::shared_ptr<Sphere> sphere4 = std::make_shared<Sphere>(glm::vec3{ -1.0f, 0.0f, -1.0f }, 0.4f, leftIns);
+	std::shared_ptr<Sphere> sphere3 = std::make_shared<Sphere>(glm::vec3{ 1.0f, 0.0f, -1.0f }, 0.5f, right);
 
 	world.add(sphere0);
 	world.add(sphere1);
+	world.add(sphere2);
+	world.add(sphere3);
+	world.add(sphere4);
 
 	Camera cam;
 
-	cam.imageWidth = 1920;
-	cam.imageHeight = 1080;
+	cam.imageWidth = 2560;
+	cam.imageHeight = 1440;
 
 	cam.render(world);
 	

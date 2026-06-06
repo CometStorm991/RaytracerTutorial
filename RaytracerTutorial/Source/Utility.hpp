@@ -74,6 +74,20 @@ inline glm::vec3 randomOnHemisphere(const glm::vec3& norm)
 	}
 }
 
+inline bool nearZero(const glm::vec3& vec)
+{
+	float thresh = 0.001f;
+	return std::fabs(vec.x) < thresh && std::fabs(vec.y) < thresh && std::fabs(vec.z) < thresh;
+}
+
+inline glm::vec3 refract(const glm::vec3& in, const glm::vec3 norm, float eta)
+{
+	float cosThet = std::fmin(glm::dot(-in, norm), 1.0f);
+	glm::vec3 outPerp = eta * (in + cosThet * norm);
+	glm::vec3 outPar = -std::sqrtf(std::fabs(1.0f - glm::length2(outPerp))) * norm;
+	return outPerp + outPar;
+}
+
 class Interval
 {
 public:

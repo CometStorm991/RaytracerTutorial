@@ -1,9 +1,8 @@
 #include "Sphere.hpp"
 
-Sphere::Sphere(glm::vec3 cent, float rad)
-	: cent{cent}, rad{rad}
+Sphere::Sphere(glm::vec3 cent, float rad, std::shared_ptr<Material> mat)
+	: cent{ cent }, rad{ rad }, mat{ mat }
 {
-
 }
 
 bool Sphere::hit(const Ray& ray, Interval rayTime, HitRecord& hitRec) const
@@ -36,6 +35,7 @@ bool Sphere::hit(const Ray& ray, Interval rayTime, HitRecord& hitRec) const
 	hitRec.point = ray.at(time);
 	glm::vec3 outNorm = (hitRec.point - cent) / rad;
 	hitRec.setFaceNormal(ray, outNorm);
+	hitRec.mat = mat;
 
 	return true;
 }

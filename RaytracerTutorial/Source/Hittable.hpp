@@ -2,10 +2,12 @@
 
 #include "Utility.hpp"
 
+class Material;
 struct HitRecord
 {
 	glm::vec3 point;
 	glm::vec3 norm;
+	std::shared_ptr<Material> mat;
 	float time;
 	bool frontFace;
 

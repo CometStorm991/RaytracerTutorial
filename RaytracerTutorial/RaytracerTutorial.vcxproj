@@ -136,8 +136,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\Dielectric.cpp" />
     <ClCompile Include="Source\HittableList.cpp" />
+    <ClCompile Include="Source\Lambertian.cpp" />
     <ClCompile Include="Source\Main.cpp" />
+    <ClCompile Include="Source\Metal.cpp" />
     <ClCompile Include="Source\Ray.cpp" />
     <ClCompile Include="Source\Sphere.cpp" />
     <ClCompile Include="Source\Utility.cpp" />
@@ -148,8 +151,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Camera.hpp" />
+    <ClInclude Include="Source\Dielectric.hpp" />
     <ClInclude Include="Source\Hittable.hpp" />
     <ClInclude Include="Source\HittableList.hpp" />
+    <ClInclude Include="Source\Lambertian.hpp" />
+    <ClInclude Include="Source\Material.hpp" />
+    <ClInclude Include="Source\Metal.hpp" />
     <ClInclude Include="Source\Ray.hpp" />
     <ClInclude Include="Source\Sphere.hpp" />
     <ClInclude Include="Source\Utility.hpp" />
